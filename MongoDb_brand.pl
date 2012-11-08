@@ -61,96 +61,110 @@ while(my $data=<CV>){
 			print"******$BrandName[$i]*******\nBrand Matched\n";
 			$catFlg=1;
 
-			
-			if($Category[$i]=~m/$category/is){
+			my @moreCategory=split(";",$category);
+			foreach my $subcategory(@moreCategory){
+				if($Category[$i]=~m/$subcategory/is){
 
-				
-				print"Category Matched\n";
-				
-				print".................Matching--$Source[$i]<>$source\n";
-				
-				if($Source[$i]!~m/$source/is){
+					
+					print"Category Matched\n";
+					
+					print".................Matching--$Source[$i]<>$source\n";
 
-					my @SrcCount=split(",",$Source[$i]);
-					print scalar(@SrcCount);<>;
-					if(scalar(@SrcCount) > 0){
-						print"inside sourcecount\n";
-						push(@SrcCount,"$source");
-						my $srcUp=join(",",@SrcCount);
-						my $source_count=scalar(@SrcCount);
-						$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
-						$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
+					my @moreSource=split(";",$source);
+					foreach my $subsource(@moreSource){
+						if($Source[$i]!~m/$subsource/is){
 
+							my @SrcCount=split(",",$Source[$i]);
+							print scalar(@SrcCount);
+							if(scalar(@SrcCount) > 0){
+								print"inside sourcecount\n";
+								push(@SrcCount,"$subsource");
+								my $srcUp=join(",",@SrcCount);
+								my $source_count=scalar(@SrcCount);
+								$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+								$Source[$i].=",$subsource";
+								$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
+
+							}
+							else{
+								print"Source Not Matched\n";
+								$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$subsource"}});
+								$worksheet->write($r,4,"Source Updated");
+							}
+							
+						
+						}
+						else{
+
+							print"Matched All-Dupe wit Master\n";
+							$worksheet->write($r,4,"Duped");
+						}
+					}
+
+				}
+
+				else{
+
+					my @catCount=split(",",$Category[$i]);
+					
+					if(scalar(@catCount) > 0){
+
+						push(@catCount,"$subcategory");
+						my $catup=join(",",@catCount);
+						my $category_count=scalar(@catCount);
+						$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Category" => "$catup","Categorycount" => "$category_count"}});
+						$Category[$i].=",$subcategory";
+						$worksheet->write($r,4,"Category Updated");$worksheet->write($r,6,"$category_count");
+						my @moreSource=split(";",$source);
+						foreach my $subsource(@moreSource){
+							if($Source[$i]!~m/$subsource/is){
+
+								my @SrcCount=split(",",$Source[$i]);
+								print scalar(@SrcCount);
+								if(scalar(@SrcCount) > 0){
+									print"inside sourcecount\n";
+									push(@SrcCount,"$subsource");
+									my $srcUp=join(",",@SrcCount);
+									my $source_count=scalar(@SrcCount);
+									$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+									$Source[$i].=",$subsource";
+									$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
+								}
+								else{
+									print"Source Not Matched\n";
+									$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
+									$Source[$i].=",$subsource";
+									$worksheet->write($r,4,"Source Updated");
+								}
+							}
+						}
 					}
 					else{
-						print"Source Not Matched\n";
-						$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
-						$worksheet->write($r,4,"Source Updated");
-					}
-					
-					
+						
+						$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Category" => "$subcategory"}});
+						$worksheet->write($r,4,"Category Updated");
+						my @moreSource=split(";",$source);
+						foreach my $subsource(@moreSource){
+							if($Source[$i]!~m/$subsource/is){
 
-				}
-				else{
-
-					print"Matched All-Dupe wit Master\n";
-					$worksheet->write($r,4,"Duped");
-				}
-
-
-			}
-
-			else{
-
-				my @catCount=split(",",$Category[$i]);
-				
-				if(scalar(@catCount) > 0){
-
-					push(@catCount,"$category");
-					my $catup=join(",",@catCount);
-					my $category_count=scalar(@catCount);
-					$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Category" => "$catup","Categorycount" => "$category_count"}});
-					$worksheet->write($r,4,"Category Updated");$worksheet->write($r,6,"$category_count");
-					if($Source[$i]!~m/$source/is){
-
-						my @SrcCount=split(",",$Source[$i]);
-						print scalar(@SrcCount);
-						if(scalar(@SrcCount) > 0){
-							print"inside sourcecount\n";
-							push(@SrcCount,"$source");
-							my $srcUp=join(",",@SrcCount);
-							my $source_count=scalar(@SrcCount);
-							$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
-							$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
-						}
-						else{
-							print"Source Not Matched\n";
-							$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
-							$worksheet->write($r,4,"Source Updated");
-						}
-					
-					}
-				}
-				else{
-					
-					$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Category" => "$category"}});
-					$worksheet->write($r,4,"Category Updated");
-					if($Source[$i]!~m/$source/is){
-
-						my @SrcCount=split(",",$Source[$i]);
-						print scalar(@SrcCount);
-						if(scalar(@SrcCount) > 0){
-							print"inside sourcecount\n";
-							push(@SrcCount,"$source");
-							my $srcUp=join(",",@SrcCount);
-							my $source_count=scalar(@SrcCount);
-							$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
-							$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
-						}
-						else{
-							print"Source Not Matched\n";
-							$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
-							$worksheet->write($r,4,"Source Updated");
+								my @SrcCount=split(",",$Source[$i]);
+								print scalar(@SrcCount);
+								if(scalar(@SrcCount) > 0){
+									print"inside sourcecount\n";
+									push(@SrcCount,"$subsource");
+									my $srcUp=join(",",@SrcCount);
+									my $source_count=scalar(@SrcCount);
+									$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+									$Source[$i].=",$subsource";
+									$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
+								}
+								else{
+									print"Source Not Matched\n";
+									$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
+									$Source[$i].=",$subsource";
+									$worksheet->write($r,4,"Source Updated");
+								}
+							}
 						}
 					}
 				}
