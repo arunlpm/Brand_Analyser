@@ -28,7 +28,16 @@ while(my $dts = $all->next)
 }
 my $count=$#BrandId;
 
-
+my $workbook =Spreadsheet::WriteExcel->new('Report.xls');
+my $worksheet=$workbook->add_worksheet();
+$worksheet->write(0,0,"BrandName");
+$worksheet->write(0,1,"Category");
+$worksheet->write(0,2,"Source");
+$worksheet->write(0,3,"InCosmos");
+$worksheet->write(0,4,"Actions");
+$worksheet->write(0,5,"SourceCount");
+$worksheet->write(0,6,"CategoryCount");
+my $r=1;
 
 open(CV,"<input.csv");
 
@@ -51,6 +60,8 @@ while(my $data=<CV>){
 
 			print"******$BrandName[$i]*******\nBrand Matched\n";
 			$catFlg=1;
+
+			
 			if($Category[$i]=~m/$category/is){
 
 				
@@ -68,11 +79,13 @@ while(my $data=<CV>){
 						my $srcUp=join(",",@SrcCount);
 						my $source_count=scalar(@SrcCount);
 						$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+						$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
 
 					}
 					else{
 						print"Source Not Matched\n";
 						$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
+						$worksheet->write($r,4,"Source Updated");
 					}
 					
 					
@@ -81,6 +94,7 @@ while(my $data=<CV>){
 				else{
 
 					print"Matched All-Dupe wit Master\n";
+					$worksheet->write($r,4,"Duped");
 				}
 
 
@@ -96,6 +110,7 @@ while(my $data=<CV>){
 					my $catup=join(",",@catCount);
 					my $category_count=scalar(@catCount);
 					$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Category" => "$catup","Categorycount" => "$category_count"}});
+					$worksheet->write($r,4,"Category Updated");$worksheet->write($r,6,"$category_count");
 					if($Source[$i]!~m/$source/is){
 
 						my @SrcCount=split(",",$Source[$i]);
@@ -106,10 +121,12 @@ while(my $data=<CV>){
 							my $srcUp=join(",",@SrcCount);
 							my $source_count=scalar(@SrcCount);
 							$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+							$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
 						}
 						else{
 							print"Source Not Matched\n";
 							$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
+							$worksheet->write($r,4,"Source Updated");
 						}
 					
 					}
@@ -117,7 +134,7 @@ while(my $data=<CV>){
 				else{
 					
 					$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Category" => "$category"}});
-
+					$worksheet->write($r,4,"Category Updated");
 					if($Source[$i]!~m/$source/is){
 
 						my @SrcCount=split(",",$Source[$i]);
@@ -128,10 +145,12 @@ while(my $data=<CV>){
 							my $srcUp=join(",",@SrcCount);
 							my $source_count=scalar(@SrcCount);
 							$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+							$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
 						}
 						else{
 							print"Source Not Matched\n";
 							$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
+							$worksheet->write($r,4,"Source Updated");
 						}
 					}
 				}
@@ -139,11 +158,8 @@ while(my $data=<CV>){
 		}
 
 	
-
-
-
 	}
-
+	$worksheet->write($r,0,"$bName");$worksheet->write($r,1,"$category");$worksheet->write($r,2,"$source");$worksheet->write($r,3,"$incosmos");
 	if($catFlg == 0){
 
 		print"Not Found \n inserting a record...\n";
@@ -152,11 +168,12 @@ while(my $data=<CV>){
 		print"Last rec-$id\nincremented..\n";
 		$id++;
 		print"$id\n";
-		$db->brands->insert({"BrandId" => "$id","BrandName" => "$bName","Source" => "$source","SOurceCount" => "1","Category" => "$category","Categorycount" => "1","InCosmos" => ""});
+		$db->brands->insert({"BrandId" => "$id","BrandName" => "$bName","Source" => "$source","SOurceCount" => "1","Category" => "$category","Categorycount" => "1","InCosmos" => "$incosmos"});
+		$worksheet->write($r,4,"Added");$worksheet->write($r,5,"1");$worksheet->write($r,6,"1");
 		print"Inserted\n";
 
 	}
-
+$r++;
 }
 
 close(CV);
