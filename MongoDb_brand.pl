@@ -37,6 +37,8 @@ $worksheet->write(0,3,"InCosmos");
 $worksheet->write(0,4,"Actions");
 $worksheet->write(0,5,"SourceCount");
 $worksheet->write(0,6,"CategoryCount");
+$worksheet->write(0,7,"IdentifiedCategory");
+$worksheet->write(0,8,"IdentifiedSource");
 my $r=1;
 
 open(CV,"<input.csv");
@@ -82,8 +84,9 @@ while(my $data=<CV>){
 								my $srcUp=join(",",@SrcCount);
 								my $source_count=scalar(@SrcCount);
 								$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+								$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");$worksheet->write($r,8,"$srcUp");
 								$Source[$i].=",$subsource";
-								$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
+								
 
 							}
 							else{
@@ -113,8 +116,8 @@ while(my $data=<CV>){
 						my $catup=join(",",@catCount);
 						my $category_count=scalar(@catCount);
 						$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Category" => "$catup","Categorycount" => "$category_count"}});
-						$Category[$i].=",$subcategory";
-						$worksheet->write($r,4,"Category Updated");$worksheet->write($r,6,"$category_count");
+						$worksheet->write($r,4,"Category Updated");$worksheet->write($r,6,"$category_count");$worksheet->write($r,7,"$catup");
+						$Category[$i].=",$subcategory";						
 						my @moreSource=split(";",$source);
 						foreach my $subsource(@moreSource){
 							if($Source[$i]!~m/$subsource/is){
@@ -127,14 +130,16 @@ while(my $data=<CV>){
 									my $srcUp=join(",",@SrcCount);
 									my $source_count=scalar(@SrcCount);
 									$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+									$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");$worksheet->write($r,8,"$srcUp");
 									$Source[$i].=",$subsource";
-									$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
+									
 								}
 								else{
 									print"Source Not Matched\n";
 									$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
-									$Source[$i].=",$subsource";
 									$worksheet->write($r,4,"Source Updated");
+									$Source[$i].=",$subsource";
+									
 								}
 							}
 						}
@@ -155,14 +160,16 @@ while(my $data=<CV>){
 									my $srcUp=join(",",@SrcCount);
 									my $source_count=scalar(@SrcCount);
 									$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$srcUp","SOurceCount" => "$source_count"}});
+									$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");$worksheet->write($r,8,"$srcUp");
 									$Source[$i].=",$subsource";
-									$worksheet->write($r,4,"Source Updated");$worksheet->write($r,5,"$source_count");
+									
 								}
 								else{
 									print"Source Not Matched\n";
 									$db->brands->update({"BrandId" => "$BrandId[$i]" }, {'$set' => {"Source" => "$source"}});
-									$Source[$i].=",$subsource";
 									$worksheet->write($r,4,"Source Updated");
+									$Source[$i].=",$subsource";
+									
 								}
 							}
 						}
